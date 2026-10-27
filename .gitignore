@@ -1,0 +1,18 @@
+venv/
+__pycache__/
+.DS_Store
+
+# данные пересоздаются скриптами; сайт скачивает каталог сам
+data/
+archive/
+
+# в репозиторий идёт только модель, которую использует сайт
+models/*
+!models/orbital_shield_mlp.joblib
+
+# фронтенд: зависимости не храним, а собранный web/dist храним —
+# тогда на хостинге не нужен Node.js
+web/node_modules/
+
+.claude/
+.vscode/

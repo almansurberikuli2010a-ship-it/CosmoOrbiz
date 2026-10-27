@@ -1,0 +1,98 @@
+{
+  "test": [
+    {
+      "model": "MLP",
+      "macro_f1": 0.43613866743560237,
+      "balanced_accuracy": 0.5233357573039693,
+      "accuracy": 0.5798525798525799,
+      "within_one_level": 0.9519767701585884,
+      "dangerous_called_safe": 0.04573170731707317,
+      "danger_share": 0.09768446132082496,
+      "auc_danger": 0.8141823135008724,
+      "top10_catches": 0.43521341463414637,
+      "top30_catches": 0.7088414634146342
+    },
+    {
+      "model": "Логистическая регрессия",
+      "macro_f1": 0.4307351652073884,
+      "balanced_accuracy": 0.5190269648589458,
+      "accuracy": 0.5899784081602264,
+      "within_one_level": 0.9390216662943935,
+      "dangerous_called_safe": 0.05030487804878049
+    },
+    {
+      "model": "Всегда «самый частый класс»",
+      "macro_f1": 0.18293201133144477,
+      "balanced_accuracy": 0.25,
+      "accuracy": 0.5769488496761224,
+      "within_one_level": 0.9857791675973494,
+      "dangerous_called_safe": 0.0
+    }
+  ],
+  "confusion_matrix": [
+    [
+      3131,
+      1098,
+      134,
+      7
+    ],
+    [
+      1217,
+      4124,
+      2002,
+      406
+    ],
+    [
+      56,
+      337,
+      448,
+      280
+    ],
+    [
+      4,
+      38,
+      64,
+      85
+    ]
+  ],
+  "n_train": 53705,
+  "n_test": 13431,
+  "features": [
+    "perigee_alt_km",
+    "apogee_alt_km",
+    "inclination_deg",
+    "eccentricity",
+    "mean_motion_rev_day",
+    "tle_age_days",
+    "log_n_shell_10",
+    "log_n_shell_25",
+    "log_n_shell_50",
+    "log_n_debris_shell_25",
+    "log_n_rb_shell_25",
+    "log_n_payload_shell_25",
+    "frac_debris_shell_25",
+    "mean_vrel_est_kms",
+    "max_vrel_est_kms",
+    "frac_fast_crossers",
+    "log_n_moid_1km",
+    "log_n_moid_5km",
+    "log_n_moid_20km",
+    "log_flux_moid5",
+    "log_pc_potential_max",
+    "log_pc_potential_sum",
+    "in_constellation",
+    "log_n_same_group_shell_25",
+    "frac_same_group_shell_25",
+    "log_phase_min_miss_km",
+    "log_phase_pc_max",
+    "log_phase_pc_sum",
+    "log_n_phase_close",
+    "log_nearest_km_t0",
+    "log_n_within_50km_t0",
+    "log_n_within_200km_t0"
+  ],
+  "hidden": [
+    64,
+    32
+  ]
+}

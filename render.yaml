@@ -1,0 +1,19 @@
+# Render Blueprint: один веб-сервис отдаёт и API, и собранный сайт (web/dist).
+# Перед загрузкой в GitHub соберите фронтенд: cd web && npm run build
+services:
+  - type: web
+    name: cosmo-orbiz
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server.app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/status
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.17
+      # на бесплатном тарифе 512 МБ памяти: оцениваем спутники порциями,
+      # а точный расчёт угроз (скрининг всех спутников) отключаем
+      - key: ORBITAL_BATCH_SIZE
+        value: "400"
+      - key: ORBITAL_THREATS
+        value: "0"
