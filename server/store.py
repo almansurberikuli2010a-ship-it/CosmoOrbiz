@@ -47,6 +47,7 @@ log = logging.getLogger("orbital_shield")
 
 SITE_DIR = Path(os.environ.get("ORBITAL_SITE_DIR", config.DATA_DIR / "site"))
 SITE_CATALOG = SITE_DIR / "catalog.csv"
+SEED_CATALOG = Path(__file__).resolve().parent / "seed" / "catalog.csv.gz"   # снимок каталога в репозитории
 RISK_CACHE = SITE_DIR / "risk_cache.json"
 CATALOG_MAX_AGE_H = float(os.environ.get("ORBITAL_CATALOG_MAX_AGE_H", 12))
 RISK_MAX_AGE_H = float(os.environ.get("ORBITAL_RISK_MAX_AGE_H", 6))
@@ -98,9 +99,17 @@ class RiskStore:
         self._batch_lock = threading.Lock()
 
     # ------------------------------------------------------------------ каталог
-    def _catalog_file(self) -> Path:
+    def _catalog_file(self, download=True) -> Path:
+        if not SITE_CATALOG.exists() and SEED_CATALOG.exists():
+            # снимок каталога из репозитория: сайт поднимается за секунды, а свежий каталог
+            # скачается в фоне. Помечаем файл «старым», чтобы обновление началось сразу.
+            SITE_DIR.mkdir(parents=True, exist_ok=True)
+            with gzip.open(SEED_CATALOG, "rb") as src, open(SITE_CATALOG, "wb") as dst:
+                shutil.copyfileobj(src, dst)
+            old = time.time() - (CATALOG_MAX_AGE_H + 1) * 3600
+            os.utime(SITE_CATALOG, (old, old))
         age_h = (time.time() - SITE_CATALOG.stat().st_mtime) / 3600 if SITE_CATALOG.exists() else None
-        if not OFFLINE and (age_h is None or age_h > CATALOG_MAX_AGE_H):
+        if download and not OFFLINE and (age_h is None or age_h > CATALOG_MAX_AGE_H):
             log.info("скачиваю свежий каталог с CelesTrak ...")
             try:
                 data_download.build_catalog(out_path=SITE_CATALOG)
@@ -115,8 +124,8 @@ class RiskStore:
             return SITE_CATALOG
         raise RuntimeError("Нет каталога: запусти python3 data_download.py")
 
-    def _build_snapshot(self) -> Snapshot:
-        path = self._catalog_file()
+    def _build_snapshot(self, download=True) -> Snapshot:
+        path = self._catalog_file(download)
         st = path.stat()
         cat = Catalog.load(path)
         prop = Propagator(cat)
@@ -146,7 +155,9 @@ class RiskStore:
     def start(self):
         """Загрузить данные и дальше раз в несколько минут проверять, не пора ли обновить."""
         try:
-            snap = self._build_snapshot()
+            # стартуем с того каталога, что уже есть (или со снимка из репозитория);
+            # свежий скачивается в цикле ниже, пока сайт уже работает
+            snap = self._build_snapshot(download=not SITE_CATALOG.exists() and not SEED_CATALOG.exists())
             self._load_cache(snap)
             self.snap = snap
             self.state = "ready"
